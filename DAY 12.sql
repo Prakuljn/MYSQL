@@ -1,116 +1,35 @@
-use sakila;
+use regex1;
+show tables;
 
--- to find the second highest num
-select max(amount) from payment
-	where amount<(select max(amount) from payment);
-    
--- DDL statement
--- Data definition language
--- with data
--- create, drop, alter, truncate
+-- corelated subquery
 
--- DML statement
--- insert, update, delete
+create table emp(eid int primary key, name varchar(20));
+insert into emp values(1,'aman'),(2,'shubham'),(3,'abc');
+select * from emp;
 
-create database march3;
-use march3;
+create table emp_family(eid int, name varchar(20), father varchar(20));
+insert into emp_family values(1,'aman','raj'),(2,'shubham','kamal'),(3,'abc','aman'),(4,'ujjwal','kaluram');
+insert into emp_family values(3,'abc','abc');
+select * from emp_family;
 
-create table regex(id int, name varchar(20));
-insert into regex values(1,'anmol');
-insert into regex(name) values('anmol');
-insert into regex(name) values('anmol'),('aman');
-select * from regex;
+drop table e1;
+create table e1(eid int primary key, fname varchar(20), salary int, dept_id int);
+insert into e1 values(1,'anmol',900,10),(2,'shubham',100,10),(3,'aman',50,10),(4,'sakshi',200,11),(5,'naina',300,11);
+insert into e1 values(6,'isha',350,12);
+select * from e1;
+-- find to get the eid fname salary deptid only for those emp where the salary of the emp should be greater then the avg salary of that dept
+select * from e1 where salary>(select avg(salary) from e1 as e where e1.dept_id=e.dept_id group by dept_id);
 
--- ctas --> create table as select statement
-create table y2 as select * from sakila.actor;
-select * from y2;
+-- multi column 
+select * from e1 where (dept_id,salary) in (select e.dept_id,avg(salary) from e1 as e group by e.dept_id);
 
-drop table y3;
-create table y3 as select actor_id ,first_name  from sakila.actor;
-select * from y3;
+-- exists and non exists
+create table p1(pid int,pname varchar(20));
+insert into p1 values(101,'Mobile'),(102,'Laptop');
 
-create table y1 as select actor_id as aid,first_name as fname  from sakila.actor;
-select * from y1;
+create table o1(oid int, oname varchar(20), pid int);
+insert into o1 values (1001,'escooter',103),(1002,'clothes',104);
 
--- delete
-delete from y3; -- will delete full data
--- we use where condition with delete to delete the specific elements
-delete from y3 where actor_id in (2,4);
+select * from p1 where exists (select 1 from o1 where o1.pid=p1.pid);
+select * from p1 where not exists (select 1 from o1 where o1.pid=p1.pid);
 
--- update
-update y3 set first_name='regex';
-select * from y3;
-
-update y3 set first_name='regex' where actor_id>1 and actor_id<5;
-select * from y3;
-
--- drop
-drop table y3; -- in drop we can't able to apply any condition
-select * from y3; -- this will cause an error because the table is dropped
-
--- truncate
-select * from y1;
-truncate table y1;
-
--- difference b/w delete drop and truncate
--- delete --> delete one or more rows based on the condition -- dml -- delete is very slower 
--- truncate --> delete all the rows -- ddl -- truncate is extremely faster then drop an delete
---  drop --> delete the tables -- ddl -- drop is faster then delete but slower then truncate
--- delete and truncate doesn't affect the table structure where drop affect the table structure
--- truncate delete the old table and recreate the new table with same structure
--- delete can be roll backed means we can undo the task where as drop and truncate can't be roll backed
-
--- alter
-create table companies(id int);
-insert into companies values(10);
-select * from companies;
-desc companies;
-
--- add table columns
-alter table companies add column phone varchar(15);
-select * from companies;
-desc companies;
-
-alter table companies add column employee_count3 int not null; -- it will give bt default 0 not null
-select * from companies;
-
--- drop column
-alter table companies drop column employee_count3;
-select * from companies;
-
--- rename tables
-rename table companies to newcompany;
-select * from newcompany;
-
-alter table newcompany rename to companies;
-select * from companies;
-
--- rename column name
-alter table companies rename column phone to company_name;
-select * from companies;
-
-update companies set company_name='anmol' where id=10;
-select * from companies;
-
--- adding keys
-alter table companies add primary key(id);
-desc companies;
-
-alter table companies add constraint march3_company_name unique key(company_name);
-desc companies;
-
-alter table companies drop constraint march3_company_name;
-desc companies;
-
--- changing column datatype
-alter table companies modify company_name int; 
--- this will raise an error because we have the char in the company column and if there is no char then it will change the 
-	-- datatype
--- for changing the datatype first change the str to null or 0 then convery it to int
-
-update companies set company_name=null where id=10;
-select * from companies;
-alter table companies modify company_name int; 
-desc companies;
-
--- sqlzoo 0123568
